@@ -1,3 +1,18 @@
 @use "./variables.scss" as *;
+footer {
+  display: none !important;
+}
+// Уменьшаем отступ от верхнего края окна для центрального блока и боковых панелей
+.page > #quartz-body .sidebar {
+  padding-top: 1.5rem !important;
+}
 
-// put your custom CSS here!
+.page-header {
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+// Подтягиваем сам заголовок статьи чуть выше
+.article-title {
+  margin-top: 0.5rem !important;
+}
