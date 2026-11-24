@@ -3,9 +3,10 @@ name: Deploy Quartz site to GitHub Pages
 on:
   push:
     branches:
-      - v4
       - v5
+      - v4
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,18 +19,42 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Cache Quartz plugins
+        uses: actions/cache@v4
+        with:
+          path: .quartz/plugins
+          key: ${{ runner.os }}-plugins-${{ hashFiles('quartz.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-plugins-
+
       - name: Install Dependencies
         run: npm install
+
+      - name: Install Quartz plugins
+        run: npx quartz plugin install
+
       - name: Build Quartz
         run: npx quartz build
+
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -40,7 +65,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
